@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  @apply bg-base-dark text-slate-100 antialiased;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica Neue, Arial, sans-serif;
+  background-image: radial-gradient(circle at 20% 10%, rgba(0, 180, 255, 0.15), transparent 32%), radial-gradient(circle at 80% 0%, rgba(109, 40, 217, 0.2), transparent 28%);
+}
+
+.light body,
+body.light {
+  @apply bg-base-light text-slate-900;
+  background-image: radial-gradient(circle at 10% 10%, rgba(0, 180, 255, 0.12), transparent 35%), radial-gradient(circle at 90% 0%, rgba(71, 85, 105, 0.12), transparent 30%);
+}
+
+.glass {
+  @apply rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md;
+}
+
+.light .glass,
+body.light .glass {
+  @apply border-slate-300 bg-white/80;
+}
