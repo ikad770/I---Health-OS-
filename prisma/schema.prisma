@@ -1,0 +1,234 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Gender { MALE FEMALE OTHER PREFER_NOT_TO_SAY }
+enum ActivityLevel { LOW MODERATE HIGH ATHLETE }
+enum ConsumptionLevel { NEVER OCCASIONAL REGULAR }
+enum MedicationTiming { MORNING NOON EVENING NIGHT CUSTOM }
+enum MealRelation { BEFORE_FOOD AFTER_FOOD WITH_FOOD NOT_APPLICABLE }
+enum SupplementCategory { CARDIOVASCULAR METABOLIC SLEEP IMMUNITY LONGEVITY GENERAL }
+enum RoutineType { MORNING EVENING HYDRATION SUPPLEMENTS SLEEP WORKOUT CUSTOM }
+enum ReminderType { MEDICATION SUPPLEMENT ROUTINE HEALTH_TASK }
+enum DocumentType { BLOOD_TEST URINE_TEST ECG MRI CT ULTRASOUND DISCHARGE_REPORT DOCTOR_NOTE PRESCRIPTION OTHER }
+enum InsightSeverity { LOW MEDIUM HIGH }
+
+model User {
+  id               String   @id @default(cuid())
+  name             String?
+  email            String   @unique
+  emailVerified    DateTime?
+  passwordHash     String?
+  image            String?
+  dateOfBirth      DateTime?
+  gender           Gender?
+  country          String?
+  timezone         String?  @default("Asia/Jerusalem")
+  language         String   @default("he")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  accounts         Account[]
+  sessions         Session[]
+  healthProfile    HealthProfile?
+  goals            Goal[]
+  medications      Medication[]
+  supplements      Supplement[]
+  routines         Routine[]
+  reminders        Reminder[]
+  weightLogs       WeightLog[]
+  bodyMetrics      BodyMetric[]
+  labDocuments     LabDocument[]
+  insights         Insight[]
+  notifications    Notification[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model HealthProfile {
+  id                 String           @id @default(cuid())
+  userId             String           @unique
+  heightCm           Float?
+  weightKg           Float?
+  bmi                Float?
+  waistCm            Float?
+  bodyFatPercent     Float?
+  sleepQuality       Int?
+  stressLevel        Int?
+  activityLevel      ActivityLevel?
+  smokingStatus      ConsumptionLevel?
+  alcoholConsumption ConsumptionLevel?
+  chronicConditions  String?
+  allergies          String?
+  surgeries          String?
+  familyHistory      String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Goal {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Medication {
+  id               String           @id @default(cuid())
+  userId           String
+  name             String
+  dosage           String
+  frequency        String
+  timing           MedicationTiming @default(CUSTOM)
+  mealRelation     MealRelation     @default(NOT_APPLICABLE)
+  reason           String?
+  prescribingDoctor String?
+  startDate        DateTime
+  endDate          DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Supplement {
+  id        String             @id @default(cuid())
+  userId    String
+  name      String
+  dosage    String
+  frequency String
+  timing    String
+  category  SupplementCategory @default(GENERAL)
+  goal      String?
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Routine {
+  id        String      @id @default(cuid())
+  userId    String
+  name      String
+  type      RoutineType
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks     RoutineTask[]
+}
+
+model RoutineTask {
+  id          String   @id @default(cuid())
+  routineId   String
+  title       String
+  isCompleted Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  routine     Routine  @relation(fields: [routineId], references: [id], onDelete: Cascade)
+}
+
+model Reminder {
+  id          String       @id @default(cuid())
+  userId      String
+  type        ReminderType
+  title       String
+  schedule    String
+  linkedId    String?
+  isEnabled   Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WeightLog {
+  id        String   @id @default(cuid())
+  userId    String
+  valueKg   Float
+  loggedAt  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BodyMetric {
+  id             String   @id @default(cuid())
+  userId         String
+  bodyFatPercent Float?
+  waistCm        Float?
+  muscleMassKg   Float?
+  loggedAt       DateTime @default(now())
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LabDocument {
+  id           String       @id @default(cuid())
+  userId        String
+  title         String
+  provider      String?
+  documentType  DocumentType
+  fileName      String
+  fileKey       String
+  mimeType      String
+  fileSize      Int
+  notes         String?
+  uploadedAt    DateTime @default(now())
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  results       LabResult[]
+}
+
+model LabResult {
+  id            String      @id @default(cuid())
+  documentId    String
+  marker        String
+  value         String
+  unit          String?
+  referenceRange String?
+  isAbnormal    Boolean     @default(false)
+  document      LabDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+model Insight {
+  id        String         @id @default(cuid())
+  userId    String
+  title     String
+  content   String
+  severity  InsightSeverity
+  createdAt DateTime       @default(now())
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
