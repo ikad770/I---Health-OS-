@@ -60,3 +60,20 @@ Demo account (after seed):
 - Advanced charts and insights engine
 - Notifications delivery channels
 - Audit logging and security event dashboards
+
+## Merge conflict resolution (GitHub PRs)
+If GitHub shows **"This branch has conflicts"**, update your branch locally:
+
+```bash
+git fetch origin
+git checkout <your-branch>
+git merge origin/main
+# resolve files
+npm run check:conflicts
+```
+
+This repository includes a conflict-marker checker:
+
+```bash
+npm run check:conflicts
+```
